@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import './login.less'
 import logo from './images/logo.png'
+import {reqLogin} from '../../api'
 import { 
    Form, 
    Input, 
@@ -27,9 +28,32 @@ class login extends Component {
       }
       render () {
       
-         const onFinish = (values) => {
-              console.log('Received values of form: ', values);
-            };
+         const onFinish = async (values) => {
+               console.log('Received values of form: ', values);
+                      // 请求登陆
+               const {username, password} = values
+               const result = await reqLogin(username, password); // {status: 0, data: user}  {status: 1, msg: 'xxx'}
+               // console.log('请求成功', result)
+               if (result.status===0) { // 登陆成功
+                  // 提示登陆成功
+                  message.success('登陆成功')
+
+                  // 保存user
+                  //const user = result.data
+                  //memoryUtils.user = user // 保存在内存中
+                  //storageUtils.saveUser(user) // 保存到local中
+
+                  // 跳转到管理界面 (不需要再回退回到登陆)
+                  this.props.history.replace('/')
+
+               } else { // 登陆失败
+                  // 提示错误信息
+                  message.error(result.msg)
+               }
+         };
+         const onFinishFailed = errorInfo => {//错误的提示
+               console.log('Failed:', errorInfo);
+           };
          return <div className="login">
                   <header className="login-header">
                      <img src={logo} alt="logo"/>
@@ -44,6 +68,7 @@ class login extends Component {
                         remember: true,
                         }}
                         onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
                         autoComplete="on"
                      >
                         <Form.Item
